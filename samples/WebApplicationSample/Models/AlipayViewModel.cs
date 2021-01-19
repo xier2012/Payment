@@ -168,6 +168,18 @@ namespace WebApplicationSample.Models
         public string OutRequestNo { get; set; }
     }
 
+    public class AlipayTradeCloseViewModel
+    {
+        [Display(Name = "out_trade_no")]
+        public string OutTradeNo { get; set; }
+
+        [Display(Name = "trade_no")]
+        public string TradeNo { get; set; }
+
+        [Display(Name = "notify_url")]
+        public string NotifyUrl { get; set; }
+    }
+
     public class AlipayTransferViewModel
     {
         [Required]

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Security.Cryptography;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using Essensoft.AspNetCore.Payment.Alipay.Utility;
 using Essensoft.AspNetCore.Payment.Security;
@@ -13,32 +12,98 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Parser
     /// </summary>
     public class AlipayJsonParser<T> : IAlipayParser<T> where T : AlipayResponse
     {
-        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions { IgnoreNullValues = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
+        #region IAlipayParser<T> Members
 
-        public string EncryptSourceData(IAlipayRequest<T> request, string body, string encryptType, string encryptKey)
+        public T Parse(string body)
         {
-            if (!"AES".Equals(encryptType))
+            if (string.IsNullOrEmpty(body))
             {
-                throw new AlipayException("API only support AES!");
+                throw new ArgumentNullException(nameof(body));
             }
 
-            var item = ParseEncryptData(request, body);
-            var bodyIndexContent = body.Substring(0, item.startIndex);
-            var bodyEndexContent = body.Substring(item.endIndex);
-            var bizContent = AES.Decrypt(item.encryptContent, encryptKey, AlipaySignature.AES_IV, CipherMode.CBC, PaddingMode.PKCS7);
+            T rsp = null;
+            IDictionary json = null;
 
-            return bodyIndexContent + bizContent + bodyEndexContent;
+            try
+            {
+                if (body.StartsWith("{") && body.EndsWith("}"))
+                {
+                    json = JsonSerializer.Deserialize<IDictionary>(body, JsonParser.JsonSerializerOptions);
+                }
+
+                if (json != null)
+                {
+                    // 忽略根节点的名称
+                    foreach (var key in json.Keys)
+                    {
+                        rsp = JsonSerializer.Deserialize<T>(json[key].ToString(), JsonParser.JsonSerializerOptions);
+                        if (rsp != null)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            catch { }
+
+            if (rsp == null)
+            {
+                rsp = Activator.CreateInstance<T>();
+            }
+
+            if (rsp != null)
+            {
+                rsp.Body = body;
+            }
+
+            return rsp;
         }
+
+        public SignItem GetSignItem(IAlipayRequest<T> request, string body)
+        {
+            if (string.IsNullOrEmpty(body))
+            {
+                return null;
+            }
+
+            var signItem = new SignItem
+            {
+                Sign = GetSign(body),
+                SignSourceData = GetSignSourceData(request, body)
+            };
+
+            return signItem;
+        }
+
+        public CertItem GetCertItem(IAlipayRequest<T> request, string body)
+        {
+            if (string.IsNullOrEmpty(body))
+            {
+                return null;
+            }
+
+            var json = JsonSerializer.Deserialize<IDictionary>(body, JsonParser.JsonSerializerOptions);
+            var certItem = new CertItem()
+            {
+                Sign = json[AlipayConstants.SIGN]?.ToString(),
+                CertSN = json[AlipayConstants.ALIPAY_CERT_SN]?.ToString(),
+                SignSourceData = GetSignSourceData(request, body)
+            };
+
+            return certItem;
+        }
+
+        #endregion
 
         private static string GetSign(string body)
         {
-            var json = JsonSerializer.Deserialize<IDictionary>(body, jsonSerializerOptions);
+            var json = JsonSerializer.Deserialize<IDictionary>(body, JsonParser.JsonSerializerOptions);
             return json[AlipayConstants.SIGN]?.ToString();
         }
 
         private static string GetSignSourceData(IAlipayRequest<T> request, string body)
         {
-            var rootNode = AlipayUtility.GetRootElement(request.GetApiName());
+            var rootNode = request.GetApiName().Replace(".", "_") + AlipayConstants.RESPONSE_SUFFIX;
             var errorRootNode = AlipayConstants.ERROR_RESPONSE;
 
             var indexOfRootNode = body.IndexOf(rootNode, StringComparison.Ordinal);
@@ -75,6 +140,21 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Parser
             }
 
             return signSourceData.SourceData;
+        }
+
+        public string EncryptSourceData(IAlipayRequest<T> request, string body, string encryptType, string encryptKey)
+        {
+            if (!"AES".Equals(encryptType))
+            {
+                throw new AlipayException("API only support AES!");
+            }
+
+            var item = ParseEncryptData(request, body);
+            var bodyIndexContent = body.Substring(0, item.startIndex);
+            var bodyEndexContent = body[item.endIndex..];
+            var bizContent = AES.Decrypt(item.encryptContent, encryptKey, AlipaySignature.AES_IV, CipherMode.CBC, PaddingMode.PKCS7);
+
+            return bodyIndexContent + bizContent + bodyEndexContent;
         }
 
         /// <summary>
@@ -127,88 +207,5 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Parser
             };
             return item;
         }
-
-        #region IAlipayParser<T> Members
-
-        public T Parse(string body)
-        {
-            if (string.IsNullOrEmpty(body))
-            {
-                throw new ArgumentNullException(nameof(body));
-            }
-
-            T rsp = null;
-            IDictionary json = null;
-
-            try
-            {
-                if (body.StartsWith("{") && body.EndsWith("}"))
-                {
-                    json = JsonSerializer.Deserialize<IDictionary>(body, jsonSerializerOptions);
-                }
-
-                if (json != null)
-                {
-                    // 忽略根节点的名称
-                    foreach (var key in json.Keys)
-                    {
-                        rsp = JsonSerializer.Deserialize<T>(json[key].ToString(), jsonSerializerOptions);
-                        if (rsp != null)
-                        {
-                            break;
-                        }
-                    }
-                }
-            }
-            catch { }
-
-            if (rsp == null)
-            {
-                rsp = Activator.CreateInstance<T>();
-            }
-
-            if (rsp != null)
-            {
-                rsp.Body = body;
-            }
-
-            return rsp;
-        }
-
-        public SignItem GetSignItem(IAlipayRequest<T> request, string body)
-        {
-            if (string.IsNullOrEmpty(body))
-            {
-                return null;
-            }
-
-            var signItem = new SignItem
-            {
-                Sign = GetSign(body),
-                SignSourceDate = GetSignSourceData(request, body)
-            };
-
-            return signItem;
-        }
-
-        public CertItem GetCertItem(IAlipayRequest<T> request, string body)
-        {
-            if (string.IsNullOrEmpty(body))
-            {
-                return null;
-            }
-
-            var json = JsonSerializer.Deserialize<IDictionary>(body, jsonSerializerOptions);
-            var certItem = new CertItem()
-            {
-                Sign = json[AlipayConstants.SIGN]?.ToString(),
-                CertSN = json[AlipayConstants.ALIPAY_CERT_SN]?.ToString(),
-                SignSourceDate = GetSignSourceData(request, body)
-            };
-
-            return certItem;
-        }
-
-        #endregion
     }
 }

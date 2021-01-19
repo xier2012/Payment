@@ -8,6 +8,11 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Request
     /// </summary>
     public class AlipayOpenMiniVersionListQueryRequest : IAlipayRequest<AlipayOpenMiniVersionListQueryResponse>
     {
+        /// <summary>
+        /// 小程序版本列表查询
+        /// </summary>
+        public string BizContent { get; set; }
+
         #region IAlipayRequest Members
         private bool needEncrypt = false;
         private string apiVersion = "1.0";
@@ -25,7 +30,6 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Request
 
         public bool GetNeedEncrypt()
         {
-
             return needEncrypt;
         }
 
@@ -96,7 +100,10 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Request
 
         public IDictionary<string, string> GetParameters()
         {
-            var parameters = new AlipayDictionary();
+            var parameters = new AlipayDictionary
+            {
+                { "biz_content", BizContent }
+            };
             return parameters;
         }
 

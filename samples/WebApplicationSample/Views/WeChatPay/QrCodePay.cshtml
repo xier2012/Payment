@@ -31,11 +31,15 @@
             </div>
             <div class="form-group">
                 <label asp-for="NotifyUrl"></label>
-                <input type="text" class="form-control" asp-for="NotifyUrl" value="http://*/notify/wechatpay/unifiedorder">
+                <input type="text" class="form-control" asp-for="NotifyUrl" value="http://domain.com/wechatpay/notify/unifiedorder">
             </div>
             <div class="form-group">
                 <label asp-for="TradeType"></label>
                 <input type="text" class="form-control" asp-for="TradeType" value="NATIVE">
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfitSharing"></label>
+                <input type="text" class="form-control" asp-for="ProfitSharing">
             </div>
             <button type="submit" class="btn btn-primary">提交请求</button>
         </form>

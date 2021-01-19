@@ -15,7 +15,7 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Domain
         public List<SettleCardInfo> BizCards { get; set; }
 
         /// <summary>
-        /// 品牌id
+        /// 品牌id，非加油站等特殊门店无需关注。
         /// </summary>
         [JsonPropertyName("brand_id")]
         public string BrandId { get; set; }
@@ -33,31 +33,31 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Domain
         public List<ShopBusinessTime> BusinessTime { get; set; }
 
         /// <summary>
-        /// 营业执照图片url。其值为使用ant.merchant.expand.indirect.image.upload上传图片得到的一串oss key。当店铺类目为特殊行业时必填
+        ///  营业执照图片 id 即通过 https://opendocs.alipay.com/apis/api_1/ant.merchant.expand.indirect.image.upload 接口上传图片后得到的 image_id。
         /// </summary>
         [JsonPropertyName("cert_image")]
         public string CertImage { get; set; }
 
         /// <summary>
-        /// 营业执照名称，填写值为营业执照或统一社会信用代码证上的名称。当店铺类目是特殊类目是要求必填
+        /// 营业执照名称，填写值为营业执照或统一社会信用代码证上的名称。
         /// </summary>
         [JsonPropertyName("cert_name")]
         public string CertName { get; set; }
 
         /// <summary>
-        /// 证件号码。请填写店铺营业执照号。当店铺类目是特殊类目是要求必填
+        /// 证件号码。请填写店铺营业执照号。
         /// </summary>
         [JsonPropertyName("cert_no")]
         public string CertNo { get; set; }
 
         /// <summary>
-        /// 证件类型，取值范围：201：营业执照；2011:多证合一(统一社会信用代码)。当店铺类目是特殊类目是要求必填
+        /// 证件类型，取值范围：201：营业执照；2011:多证合一(统一社会信用代码)。
         /// </summary>
         [JsonPropertyName("cert_type")]
         public string CertType { get; set; }
 
         /// <summary>
-        /// 联系人信息。如果填写，其中名称必填，手机、固话、email三选一必填
+        /// 联系人信息。如果填写，其中名称必填，手机、固话、email 三选一必填。
         /// </summary>
         [JsonPropertyName("contact_infos")]
         public List<ContactInfo> ContactInfos { get; set; }
@@ -81,25 +81,25 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Domain
         public List<ShopExtInfo> ExtInfos { get; set; }
 
         /// <summary>
-        /// 商户角色id，表示将要开的店属于哪个商户角色。对于直连开店场景，填写商户pid；对于间连开店场景（线上、线下、直付通），填写商户smid
+        /// 商户角色id，表示将要开的店属于哪个商户角色。对于直连开店场景，填写商户pid；对于间连开店场景（线上、线下、直付通），填写商户smid。特别说明：IoT设备三绑定场景统一填写商户pid
         /// </summary>
         [JsonPropertyName("ip_role_id")]
         public string IpRoleId { get; set; }
 
         /// <summary>
-        /// 法人身份证号。当店铺类目是特殊类目是要求必填
+        /// 法人身份证号。
         /// </summary>
         [JsonPropertyName("legal_cert_no")]
         public string LegalCertNo { get; set; }
 
         /// <summary>
-        /// 法人名称。当店铺类目是特殊类目是要求必填
+        /// 法人名称。
         /// </summary>
         [JsonPropertyName("legal_name")]
         public string LegalName { get; set; }
 
         /// <summary>
-        /// 营业执照授权函。其值为使用ant.merchant.expand.indirect.image.upload上传图片得到的一串oss key。当店铺类目是特殊行业时必填
+        /// 营业执照授权函。其值为使用ant.merchant.expand.indirect.image.upload上传图片得到的一串oss key。
         /// </summary>
         [JsonPropertyName("license_auth_letter_image")]
         public string LicenseAuthLetterImage { get; set; }
@@ -111,25 +111,25 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Domain
         public string Memo { get; set; }
 
         /// <summary>
-        /// 门头照，其值为使用ant.merchant.expand.indirect.image.upload上传图片得到的一串oss key。当店铺类目是特殊类目是要求必填
+        /// 门头照 id，即通过 https://opendocs.alipay.com/apis/api_1/ant.merchant.expand.indirect.image.upload 接口上传图片后得到的 image_id。
         /// </summary>
         [JsonPropertyName("out_door_images")]
         public List<string> OutDoorImages { get; set; }
 
         /// <summary>
-        /// 行业特殊资质。当店铺类目是特殊类目是要求必填
+        /// 行业特殊资质。
         /// </summary>
         [JsonPropertyName("qualifications")]
         public List<IndustryQualificationInfo> Qualifications { get; set; }
 
         /// <summary>
-        /// 场景
+        /// 场景，非加油站等特殊门店无需关注。
         /// </summary>
         [JsonPropertyName("scene")]
         public string Scene { get; set; }
 
         /// <summary>
-        /// 结算支付宝账号的登录号
+        /// 结算支付宝账号的登录号，需传入小程序归属账号。若需增加收款账号，可在创建门店后登录 b.alipay.com 账户中心 > 经营信息 > 门店管理 中选择对应门店选择 更多 > 编辑 > 新增收款账号。 
         /// </summary>
         [JsonPropertyName("settle_alipay_logon_id")]
         public string SettleAlipayLogonId { get; set; }

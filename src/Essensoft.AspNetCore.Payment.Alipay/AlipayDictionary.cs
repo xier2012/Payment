@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Text.Json;
+using Essensoft.AspNetCore.Payment.Alipay.Parser;
 
 namespace Essensoft.AspNetCore.Payment.Alipay
 {
-    /// <summary>
-    /// 符合Alipay习惯的纯字符串字典结构。
-    /// </summary>
     public class AlipayDictionary : Dictionary<string, string>
     {
         private const string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -29,9 +29,9 @@ namespace Essensoft.AspNetCore.Payment.Alipay
             {
                 strValue = null;
             }
-            else if (value is string)
+            else if (value is string str)
             {
-                strValue = (string)value;
+                strValue = str;
             }
             else if (value is DateTime?)
             {
@@ -53,6 +53,14 @@ namespace Essensoft.AspNetCore.Payment.Alipay
             else if (value is bool?)
             {
                 strValue = (value as bool?).Value.ToString().ToLowerInvariant();
+            }
+            else if (value is ICollection)
+            {
+                strValue = JsonSerializer.Serialize(value, value.GetType(), JsonParser.JsonSerializerOptions);
+            }
+            else if (value is AlipayObject)
+            {
+                strValue = JsonSerializer.Serialize(value, value.GetType(), JsonParser.JsonSerializerOptions);
             }
             else
             {

@@ -3,68 +3,68 @@
 namespace Essensoft.AspNetCore.Payment.Alipay
 {
     /// <summary>
-    /// Alipay 选项。
+    /// Alipay 配置选项
     /// </summary>
     public class AlipayOptions
     {
         private string appCert;
         private string alipayPublicCert;
-        private string rootCert;
+        private string alipayRootCert;
 
         internal string AppCertSN;
         internal string AlipayPublicCertSN;
-        internal string RootCertSN;
+        internal string AlipayRootCertSN;
 
         /// <summary>
-        /// 蚂蚁金服开放平台 应用ID
+        /// 应用Id
         /// </summary>
         public string AppId { get; set; }
 
         /// <summary>
         /// RSA 支付宝公钥
-        /// 加签方式为公钥证书时，留空
+        /// “公钥证书”方式时，留空
+        /// “普通公钥”方式时，必填
         /// </summary>
         public string AlipayPublicKey { get; set; }
 
         /// <summary>
         /// RSA 应用私钥
-        /// 加签方式为公钥证书时，为证书对应的私钥
         /// </summary>
         public string AppPrivateKey { get; set; }
 
         /// <summary>
-        /// 服务地址
-        /// "https://openapi.alipay.com/gateway.do"
+        /// 服务网关地址
+        /// 默认为："https://openapi.alipay.com/gateway.do"
         /// </summary>
         public string ServerUrl { get; set; } = "https://openapi.alipay.com/gateway.do";
 
         /// <summary>
         /// 数据格式
-        /// "json"
+        /// 默认为："json"
         /// </summary>
         public string Format { get; } = "json";
 
         /// <summary>
         /// 接口版本
-        /// "1.0"
+        /// 默认为："1.0"
         /// </summary>
         public string Version { get; set; } = "1.0";
 
         /// <summary>
         /// 签名方式
-        /// "RSA2"
+        /// 默认为："RSA2"
         /// </summary>
         public string SignType { get; set; } = "RSA2";
 
         /// <summary>
         /// 编码格式
-        /// "utf-8"
+        /// 默认为："utf-8"
         /// </summary>
         public string Charset { get; } = "utf-8";
 
         /// <summary>
         /// 加密方式
-        /// "AES"
+        /// 默认为："AES"
         /// </summary>
         public string EncyptType { get; } = "AES";
 
@@ -74,7 +74,10 @@ namespace Essensoft.AspNetCore.Payment.Alipay
         public string EncyptKey { get; set; }
 
         /// <summary>
-        /// 商户证书
+        /// 应用公钥证书
+        /// 可为 证书文件路径 / 证书文件的文本内容 / 证书文件的Base64编码
+        /// “公钥证书”方式时，必填
+        /// “普通公钥”方式时，留空
         /// </summary>
         public string AppCert
         {
@@ -84,14 +87,17 @@ namespace Essensoft.AspNetCore.Payment.Alipay
                 if (!string.IsNullOrEmpty(value))
                 {
                     appCert = value;
-                    var appCertificate = AntCertificationUtil.ParseCert(value);
-                    AppCertSN = AntCertificationUtil.GetCertSN(appCertificate);
+                    var appCertificate = AlipayCertUtil.Parse(appCert);
+                    AppCertSN = AlipayCertUtil.GetCertSN(appCertificate);
                 }
             }
         }
 
         /// <summary>
         /// 支付宝公钥证书
+        /// 可为 证书文件路径 / 证书文件的文本内容 / 证书文件的Base64编码
+        /// “公钥证书”方式时，必填
+        /// “普通公钥”方式时，留空
         /// </summary>
         public string AlipayPublicCert
         {
@@ -101,25 +107,28 @@ namespace Essensoft.AspNetCore.Payment.Alipay
                 if (!string.IsNullOrEmpty(value))
                 {
                     alipayPublicCert = value;
-                    var alipayPublicCertificate = AntCertificationUtil.ParseCert(value);
-                    AlipayPublicCertSN = AntCertificationUtil.GetCertSN(alipayPublicCertificate);
-                    AlipayPublicKey = AntCertificationUtil.ExtractPemPublicKeyFromCert(alipayPublicCertificate);
+                    var alipayPublicCertificate = AlipayCertUtil.Parse(alipayPublicCert);
+                    AlipayPublicCertSN = AlipayCertUtil.GetCertSN(alipayPublicCertificate);
+                    AlipayPublicKey = AlipayCertUtil.GetCertPublicKey(alipayPublicCertificate);
                 }
             }
         }
 
         /// <summary>
-        /// 根证书
+        /// 支付宝根证书
+        /// 可为 证书文件路径 / 证书文件的文本内容 / 证书文件的Base64编码
+        /// “公钥证书”方式时，必填
+        /// “普通公钥”方式时，留空
         /// </summary>
-        public string RootCert
+        public string AlipayRootCert
         {
-            get => rootCert;
+            get => alipayRootCert;
             set
             {
                 if (!string.IsNullOrEmpty(value))
                 {
-                    rootCert = value;
-                    RootCertSN = AntCertificationUtil.GetRootCertSN(value);
+                    alipayRootCert = value;
+                    AlipayRootCertSN = AlipayCertUtil.GetRootCertSN(alipayRootCert);
                 }
             }
         }

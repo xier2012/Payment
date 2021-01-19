@@ -22,36 +22,41 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Utility
             {
                 if (!string.IsNullOrEmpty(iter.Value))
                 {
-                    sb.Append(iter.Key).Append("=").Append(iter.Value).Append("&");
+                    sb.Append(iter.Key).Append('=').Append(iter.Value).Append('&');
                 }
             }
 
             return sb.Remove(sb.Length - 1, 1).ToString();
         }
 
-        public static string RSASignContent(string data, string privateKey, string charset, string signType)
+        public static string RSASignContent(string data, string privateKey, string signType)
         {
             return signType switch
             {
-                "RSA1" => SHA1WithRSA.Sign(data, privateKey, charset),
-                "RSA2" => SHA256WithRSA.Sign(data, privateKey, charset),
-                _ => SHA1WithRSA.Sign(data, privateKey, charset),
+                "RSA1" => SHA1WithRSA.Sign(data, privateKey),
+                "RSA2" => SHA256WithRSA.Sign(data, privateKey),
+                _ => SHA1WithRSA.Sign(data, privateKey),
             };
         }
 
-        public static bool RSACheckContent(string data, string sign, string publicKey, string charset, string signType)
+        public static bool RSACheckContent(string data, string sign, string publicKey, string signType)
         {
             return signType switch
             {
-                "RSA1" => SHA1WithRSA.Verify(data, sign, publicKey, charset),
-                "RSA2" => SHA256WithRSA.Verify(data, sign, publicKey, charset),
-                _ => SHA1WithRSA.Verify(data, sign, publicKey, charset),
+                "RSA1" => SHA1WithRSA.Verify(data, sign, publicKey),
+                "RSA2" => SHA256WithRSA.Verify(data, sign, publicKey),
+                _ => SHA1WithRSA.Verify(data, sign, publicKey),
             };
         }
 
         public static string AESEncrypt(string data, string encyptKey)
         {
             return AES.Encrypt(data, encyptKey, AES_IV, CipherMode.CBC, PaddingMode.PKCS7);
+        }
+
+        public static string AESDencrypt(string data, string encyptKey)
+        {
+            return AES.Decrypt(data, encyptKey, AES_IV, CipherMode.CBC, PaddingMode.PKCS7);
         }
 
         private static byte[] InitIv(int blockSize)
@@ -180,17 +185,6 @@ namespace Essensoft.AspNetCore.Payment.Alipay.Utility
 
             //如果没有找到配对的闭合括号，说明验签内容片段提取失败，直接尝试选取剩余整个响应字符串进行验签
             return responseString.Length;
-        }
-
-        /// <summary>
-        /// 获取公钥证书序列号
-        /// </summary>
-        /// <param name="certContent">公钥证书内容</param>
-        /// <returns>公钥证书序列号</returns>
-        public static string GetCertSN(string certContent)
-        {
-            var cert = AntCertificationUtil.ParseCert(certContent);
-            return AntCertificationUtil.GetCertSN(cert);
         }
     }
 }
